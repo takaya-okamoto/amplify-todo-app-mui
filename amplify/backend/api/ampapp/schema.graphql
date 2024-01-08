@@ -5,6 +5,7 @@ input AMPLIFY {
 } # FOR TESTING ONLY!
 type Todo @model {
   id: ID!
+  userId: String!
   name: String!
   description: String
 }
