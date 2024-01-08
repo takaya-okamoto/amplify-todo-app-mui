@@ -64,6 +64,7 @@ const Todo = ({ signOut, user }: WithAuthenticatorProps) => {
     try {
       const todoData = await client.graphql({
         query: listTodos,
+        variables: { filter: { userId: { eq: user?.userId } } },
       });
       const todos = todoData.data.listTodos.items;
       setTodos(todos);
@@ -72,11 +73,12 @@ const Todo = ({ signOut, user }: WithAuthenticatorProps) => {
     }
   };
 
-  const addTodo = async (data: CreateTodoInput) => {
+  const addTodo = async (data: Omit<CreateTodoInput, "userId">) => {
     try {
+      const todoData = { ...data, userId: user?.userId ?? "" };
       await client.graphql({
         query: createTodo,
-        variables: { input: data },
+        variables: { input: todoData },
       });
       resetField("name");
       resetField("description");
@@ -177,8 +179,9 @@ const Todo = ({ signOut, user }: WithAuthenticatorProps) => {
                     <Button
                       variant="contained"
                       onClick={() => {
-                        const id = typeof todo?.id === "string" ? todo.id : "";
-                        handleDeleteTodo(id);
+                        if (typeof todo?.id === "string") {
+                          handleDeleteTodo(todo.id);
+                        }
                       }}
                     >
                       DONE
@@ -189,6 +192,7 @@ const Todo = ({ signOut, user }: WithAuthenticatorProps) => {
             </Stack>
           </Stack>
         </Stack>
+
         <Snackbar
           open={open}
           autoHideDuration={3000}
